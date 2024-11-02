@@ -1,0 +1,72 @@
+import:
+	java.net.HttpURLConnection
+	java.net.URL
+	java.io.OutputStreamWriter
+
+
+## FUNCTIONS
+
+# Function prepareDiscordMessage
+# Description: function to format message in JSON format
+# Parameters:
+#   - avatarUrl: Avatar for Discord bot
+#   - botUsername: Username for Discord bot
+#   - embedTitle: Embed title
+#   - embedDescription: Embed description
+#   - embedFooter: Footer text
+#   - embedColor: Embed color
+
+function prepareDiscordMessage(avatarUrl: string, botUsername: string, embedTitle: string, embedDescription: string, embedFooter: string, embedColor: integer) :: string:
+	return "{ ""embeds"": [{ ""title"": ""%{_embedTitle}%"", ""description"": ""%{_embedDescription}%"", ""color"": %{_embedColor}%, ""footer"": { ""text"": ""%{_embedFooter}%"" } }], ""username"": ""%{_botUsername}%"", ""avatar_url"": ""%{_avatarUrl}%"" }"
+
+
+# Function sendDiscordMessage
+# Description: function for sending messages to the Discord channel
+# Parameters:
+#   - message: Message in JSON format
+#   - channel: Channel webhook url
+
+function sendDiscordMessage(message: string, channel: string):
+	set {_url} to new URL({_channel})
+	set {_connection} to {_url}.openConnection()
+	{_connection}.setRequestMethod("POST")
+	{_connection}.setRequestProperty("Content-Type", "application/json")
+	{_connection}.setDoOutput(true)
+
+	set {_writer} to new OutputStreamWriter({_connection}.getOutputStream())
+	{_writer}.write({_message})
+	{_writer}.flush()
+	{_writer}.close()
+
+	set {_responseCode} to {_connection}.getResponseCode()
+    
+	if {_responseCode} = 200:
+		stop
+	else if {_responseCode} = 204:
+		stop
+	else:
+		send "&c[discord-messenger.sk] &fError sending message to Discord." to console
+
+
+## CONSTANTS
+
+function BotAvatar() :: string:
+	return "https://cdn.discordapp.com/attachments/1014147200701435965/1294052865836318791/star-fall-svgrepo-com.png?ex=6714d0e5&is=67137f65&hm=aecc0259e4c8eda035b42ac9b414ea87c6d1d7e82a23fa21a3519273ef64ded3&"
+
+function BotUsername() :: string:
+	return "System alert"
+    
+function FooterText() :: string:
+	return "Date of action execution: %now%"
+    
+function RedColor() :: integer:
+	return 13458524
+    
+function YellowColor() :: integer:
+	return 15844367
+    
+function GreenColor() :: integer:
+	return 3066993
+
+function Channel() :: string:
+	return "https://discord.com/api/webhooks/your_webhook"
